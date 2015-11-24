@@ -1,0 +1,62 @@
+--- ************************************
+--- Default template in module puppet-imapfilter
+--- Managed by Puppet
+--- ************************************
+
+---------------
+--  Options  --
+---------------
+
+options.timeout = 30
+options.subscribe = true
+options.starttls = true
+options.certificates = false
+
+---------------
+-- Filters --
+---------------
+
+-- The simplest filter that is possible. Matches all messages in the mailbox.
+all = {}
+
+-- A simple filter with just one rule. Matches newly arrived, unread messages.
+new = {
+'new',
+}
+
+unseen = {
+'unseen',
+}
+
+seen = {
+'seen',
+}
+
+----------------
+--  Accounts  --
+----------------
+
+clsmail = IMAP {
+    server = '<%= imap_host %>',
+    username = '<%= imap_username %>',
+    password = '<%= imap_password %>',
+    ssl = 'tls1.2',
+}
+
+-----------------
+--  Lists      --
+-----------------
+
+-- Bonxa
+msgs = clsmail.INBOX:contain_from('bonanza.cl.no') -
+       clsmail.INBOX:contain_subject('ASSIGNED') -
+       clsmail.INBOX:contain_subject('REMIND')
+clsmail.INBOX:move_messages(clsmail['Bonanza'], msgs)
+
+-- Wiki changelog
+msgs = clsmail.INBOX:contain_from('no-reply@first.wiki.no')
+clsmail.INBOX:move_messages(clsmail['Wiktig'], msgs)
+
+-- Redmine
+msgs = clsmail.INBOX:contain_from('redmine@kloner.no')
+clsmail.INBOX:move_messages(clsmail['Redmine'], msgs)
